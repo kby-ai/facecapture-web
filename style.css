@@ -1,0 +1,100 @@
+body {
+	font-family: sans-serif;
+	text-align: center;
+	padding: 3rem;
+  margin-top: 1rem;
+	font-size: 1.125rem;
+	line-height: 1.5;
+	transition: all 725ms ease-in-out;
+  background-color: #090A26;
+}
+
+h3 {
+	font-size: 2rem;
+	font-weight: bolder;
+	margin-bottom: 1rem;
+  color: aliceblue;
+}
+
+
+.msg_label {
+  color: white;
+}
+
+#cap_message {
+  color: rgb(216, 214, 214); 
+  font-size: 1.3rem;
+  margin-bottom: 2rem;
+}
+
+#nav {
+  margin-top: 2rem;  
+}
+
+#label_auto_capture {
+  color: white;
+  margin-right: 2rem;  
+}
+
+#camera {
+  margin-left: 2rem;  
+}
+
+#inputVideo {
+  width: 640px; 
+  height: 480px;
+  background-color: black;
+  grid-column: 1;
+  grid-row: 1;
+  z-index: 1;
+  -webkit-transform: scaleX(-1);
+  transform: scaleX(-1);
+}
+
+#capture {
+  width: 640;
+  height: 480;
+  grid-column: 1;
+  grid-row: 1;
+  z-index: 2;
+  -webkit-transform: scaleX(-1);
+  transform: scaleX(-1);
+}
+
+#capture1 {
+  width: 640;
+  height: 480;
+  grid-column: 1;
+  grid-row: 1;
+  z-index: 0;
+  -webkit-transform: scaleX(-1);
+  transform: scaleX(-1);
+}
+
+#best_capture {
+  width: 640;
+  height: 480;
+  grid-column: 1;
+  grid-row: 1;
+  z-index: 3;
+  -webkit-transform: scaleX(-1);
+  transform: scaleX(-1);
+  visibility: hidden;
+}
+
+#face_cover {
+  width: 640;
+  height: 480;
+  grid-column: 1;
+  grid-row: 1;
+  z-index: 3;
+  visibility: hidden;
+}
+
+#div_video {
+  display: grid;
+  width: 640;
+  height: 480;
+  margin: auto;
+}
+

@@ -6,20 +6,19 @@ const MASK_THRESHOLD = 0.5;
 const SUNGLASS_THRESHOLD = 0.5;
 const EYE_DIST_THRESHOLD_MIN = 90;
 const EYE_DIST_THRESHOLD_MAX = 150;
-const BRISQUE_THRESHOLD = 12;
-const LIVENESS_THRESHOLD = 0.5;
+const BLURRINESS_THRESHOLD = 80;
+const LUMINANCE_LOW_THRESHOLD = 50;
+const LUMINANCE_HIGH_THRESHOLD = 200;
 const EYE_CLOSE_THRESHOLD = 0.8;
 
 var CAM_WIDTH = 640;
 var CAM_HEIGHT = 480;
 const CENTER_R = 190;
 
-var old_liveness1 = 0;
-var old_liveness2 = 0;
 var best_yaw = 0;
 var best_pitch = 0;
 var best_roll = 0;
-var best_brisque = 0;
+var best_blurriness = 0;
 var brisque_count = 0;
 
 var Module = {};
@@ -42,13 +41,13 @@ fetch('liveface.wasm')
     var script = document.createElement('script');
     script.src = 'liveface.js';
     script.onload = function() {
-        console.log('Emscripten boilerplate loaded.');
+        console.log('Emscripten boilerplate loaded1.');
     }
     document.body.appendChild(script);
 });
 
 
-function ncnn_liveness() {
+function checkFaceQuality() {
     const video = document.getElementById("inputVideo");
     const canvas1 = document.getElementById("capture1");
     canvas1.width = video.videoWidth;
@@ -73,44 +72,6 @@ function ncnn_liveness() {
     var qaqarray = HEAPF32.subarray(resultbuffer / Float32Array.BYTES_PER_ELEMENT, resultbuffer / Float32Array.BYTES_PER_ELEMENT + 143);
 
     var count = qaqarray[0];
-    // var i;
-    // for (i = 0; i < count > 0 ? 1 : 0; i++) {
-    //     var bbox_x = qaqarray[i * 18 + 1];
-    //     var bbox_y = qaqarray[i * 18 + 2];
-    //     var bbox_w = qaqarray[i * 18 + 3];
-    //     var bbox_h = qaqarray[i * 18 + 4];
-    //     var prob = qaqarray[i * 18 + 17];
-
-    //     // console.log('qaq ' + label + ' = ' + prob);
-        
-    //     const canvas = document.getElementById("capture");
-    //     var ctx = canvas.getContext('2d')
-    //     ctx.strokeRect(bbox_x, bbox_y, bbox_w, bbox_h);
-
-    //     var center_rect_x1 = (CAM_WIDTH / 2) - CENTER_R;
-    //     var center_rect_y1 = (CAM_HEIGHT / 2) - CENTER_R * 0.8;
-    //     var center_rect_x2 = (CAM_WIDTH / 2) + CENTER_R ;
-    //     var center_rect_y2 = (CAM_HEIGHT / 2) + CENTER_R * 1.2;
-    //     ctx.strokeRect(center_rect_x1, center_rect_y1, center_rect_x2 - center_rect_x1, center_rect_y2 - center_rect_y1);
-
-
-    //     var text = "liveness = " + parseFloat(prob * 100).toFixed(2) + "%";
-
-    //     ctx.textBaseline = 'top';
-    //     var text_width = ctx.measureText(text).width;
-    //     var text_height = parseInt(ctx.font, 10);
-    //     var x = bbox_x;
-    //     var y = bbox_y - text_height;
-    //     if (y < 0)
-    //         y = 0;
-    //     if (x + text_width > canvas.width)
-    //         x = canvas.width - text_width;
-    //     ctx.fillStyle = "rgb(255,255,255)";
-    //     ctx.fillRect(x, y, text_width, text_height);
-    //     ctx.fillStyle = "rgb(0,0,0)";
-    //     ctx.fillText(text, x, y);
-    // }
-
     var bbox_x = qaqarray[1];
     var bbox_y = qaqarray[2];
     var bbox_w = qaqarray[3];
@@ -164,19 +125,23 @@ function ncnn_liveness() {
             msg = "Go back";
             brisque_count = 0;
         }
-        else if(qaqarray[7 + 1] < BRISQUE_THRESHOLD) {//brisque
+        else if(qaqarray[17 + 1] < BLURRINESS_THRESHOLD) {//brisque
             msg = "Hold Still";
             brisque_count = 0;
         }
-        else if(qaqarray[16 + 1] < LIVENESS_THRESHOLD) {//liveness
-            msg = "Spoof Detected";
+        else if(qaqarray[16 + 1] < LUMINANCE_LOW_THRESHOLD) {//liveness
+            msg = "Low Luminance";
+            brisque_count = 0;
+        }
+        else if(qaqarray[16 + 1] > LUMINANCE_HIGH_THRESHOLD) {//liveness
+            msg = "High Luminance";
             brisque_count = 0;
         }
         else{
             msg = "Selfie OK";
 
-            if(best_brisque == 0) {
-                best_brisque = qaqarray[7 + 1];
+            if(best_blurriness == 0) {
+                best_blurriness = qaqarray[17 + 1];
                 best_yaw = Math.abs(qaqarray[4 + 1]);
                 best_pitch = Math.abs(qaqarray[5 + 1]);
                 best_roll = Math.abs(qaqarray[6 + 1]);
@@ -188,12 +153,12 @@ function ncnn_liveness() {
                 canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
             } else {
                 var is_better = 0;
-                if(qaqarray[7 + 1] < best_brisque) {
+                if(qaqarray[17 + 1] < best_blurriness) {
                     is_better = 0;
                 } else {
                     is_better = 1;
 
-                    best_brisque = qaqarray[7 + 1];
+                    best_blurriness = qaqarray[17 + 1];
                     best_yaw = Math.abs(qaqarray[4 + 1]);
                     best_pitch = Math.abs(qaqarray[5 + 1]);
                     best_roll = Math.abs(qaqarray[6 + 1]);
@@ -224,30 +189,21 @@ function ncnn_liveness() {
                 document.getElementById("face_cover").style.visibility = "hidden";
             }
         }
-
-        if(old_liveness1 == 0) {
-            old_liveness1 = qaqarray[16 + 1];
-        } else if(old_liveness2 == 0){
-            old_liveness2 = qaqarray[16 + 1];
-        } else {
-            old_liveness1 = old_liveness2;
-            old_liveness2 = qaqarray[16 + 1];
-        }
     }
     
     document.getElementById("cap_message").innerHTML = msg;
     document.getElementById("res_yaw").innerHTML = "Yaw: " + qaqarray[4 + 1];
     document.getElementById("res_pitch").innerHTML = "Pitch: " + qaqarray[5 + 1];
     document.getElementById("res_roll").innerHTML = "Roll: " + qaqarray[6 + 1];
-    document.getElementById("res_brisque").innerHTML = "Brisque: " + qaqarray[7 + 1];
     document.getElementById("res_eyeDist").innerHTML = "Eye Dist: " + qaqarray[8 + 1];
     document.getElementById("res_eyeClosed").innerHTML = "Eye Closed: " + qaqarray[11 + 1];
     document.getElementById("res_mask").innerHTML = "Mask: " + qaqarray[9 + 1];
     document.getElementById("res_sunglass").innerHTML = "Sunglass: " + qaqarray[10 + 1];
     document.getElementById("res_leftEye").innerHTML = "Left Eye: (" + qaqarray[12 + 1] + ", " + qaqarray[13 + 1] + ")";
     document.getElementById("res_rightEye").innerHTML = "Right Eye: (" + qaqarray[14 + 1] + ", " + qaqarray[15 + 1] + ")";
-    document.getElementById("res_faceScore").innerHTML = "Face Score: " + qaqarray[17 + 1];
-    document.getElementById("res_liveness").innerHTML = "Live Score: " + qaqarray[16 + 1];
+    document.getElementById("res_brisque").innerHTML = "Face Brisque: " + qaqarray[7 + 1];
+    document.getElementById("res_luminance").innerHTML = "Face Luminance: " + qaqarray[16 + 1];
+    document.getElementById("res_blurriness").innerHTML = "Face Blurriness: " + qaqarray[17 + 1];
     
     _free(resultbuffer);
     _free(dst);
@@ -266,7 +222,7 @@ async function onPlay() {
     canvas.getContext('2d').drawImage(image, 0, 0, canvas.width, canvas.height);
     document.getElementById("capture").style.opacity = "0.5"
 
-    ncnn_liveness();
+    checkFaceQuality();
   
     setTimeout(() => onPlay())
 }

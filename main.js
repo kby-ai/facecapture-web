@@ -283,6 +283,7 @@ async function onPlay() {
 
 async function startCamera() {  
 
+    load();
   const stream = await navigator.mediaDevices.getUserMedia({ video: {} })
   const videoEl = document.getElementById('inputVideo')
   if(videoEl.srcObject == null) {
@@ -313,23 +314,23 @@ function isMobile() {
 function load() {
     if(isMobile()) {
 
-      document.getElementById("inputVideo").style.width = '720'
-      document.getElementById("inputVideo").style.height = '960'
+      document.getElementById("inputVideo").style.width = '720px'
+      document.getElementById("inputVideo").style.height = '960px'
 
-      document.getElementById("capture").style.width = '720'
-      document.getElementById("capture").style.height = '960'
+      document.getElementById("capture").style.width = '720px'
+      document.getElementById("capture").style.height = '960px'
 
-      document.getElementById("face_cover").style.width = '720'
-      document.getElementById("face_cover").style.height = '960'
+      document.getElementById("face_cover").style.width = '720px'
+      document.getElementById("face_cover").style.height = '960px'
 
-      document.getElementById("capture1").style.width = '720'
-      document.getElementById("capture1").style.height = '960'
+      document.getElementById("capture1").style.width = '720px'
+      document.getElementById("capture1").style.height = '960px'
 
-      document.getElementById("best_capture").style.width = '720'
-      document.getElementById("best_capture").style.height = '960'
+      document.getElementById("best_capture").style.width = '720px'
+      document.getElementById("best_capture").style.height = '960px'
 
-      document.getElementById("div_video").style.width = '720'
-      document.getElementById("div_video").style.height = '960'
+      document.getElementById("div_video").style.width = '720px'
+      document.getElementById("div_video").style.height = '960px'
 
       document.getElementById("face_cover").src = "face_cover_p.png";
 

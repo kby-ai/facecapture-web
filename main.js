@@ -10,7 +10,7 @@ const BLURRINESS_THRESHOLD = 30;
 const LUMINANCE_LOW_THRESHOLD = 50;
 const LUMINANCE_HIGH_THRESHOLD = 200;
 const EYE_CLOSE_THRESHOLD = 0.8;
-const LIVENESS_THRESHOLD = 0.8;
+const LIVENESS_THRESHOLD = 0.5;
 
 var CAM_WIDTH = 640;
 var CAM_HEIGHT = 480;
@@ -162,10 +162,10 @@ function checkFaceQuality() {
             msg = "High Luminance";
             brisque_count = 0;
         }
-        // else if(qaqarray[18 + 1] < LIVENESS_THRESHOLD) {//liveness
-        //     msg = "Spoof Face";
-        //     brisque_count = 0;
-        // }
+        else if(qaqarray[18 + 1] < LIVENESS_THRESHOLD) {//liveness
+            msg = "Spoof Face";
+            brisque_count = 0;
+        }
         else{
             msg = "Selfie OK";
 
@@ -217,10 +217,7 @@ function checkFaceQuality() {
                     canvas.width = video.width
                     canvas.height = video.height    
                     canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);    
-    
-                    // Get the canvas data as a Base64 encoded PNG image
-                    const imageDataURL = canvas.toDataURL('image/png');
-                    send_image(imageDataURL);                }
+                }
             }
             
             brisque_count ++;
@@ -232,13 +229,17 @@ function checkFaceQuality() {
                 canvas.width = video.width
                 canvas.height = video.height
                 canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-            
+               
                 const videoEl = document.getElementById('inputVideo')
                 videoEl.srcObject = null
                 brisque_count = 0;
 
                 document.getElementById('camera').innerText = "Start Camera";
                 document.getElementById("face_cover").style.visibility = "hidden";
+
+                // const imageDataURL = canvas.toDataURL('image/png');
+                // const base64Data = imageDataURL.split(',')[1];
+                // send_image(base64Data);
             }
         }
     }
@@ -256,7 +257,7 @@ function checkFaceQuality() {
     document.getElementById("res_brisque").innerHTML = "Face Brisque: " + qaqarray[7 + 1];
     document.getElementById("res_luminance").innerHTML = "Face Luminance: " + qaqarray[16 + 1];
     document.getElementById("res_blurriness").innerHTML = "Face Blurriness: " + qaqarray[17 + 1];
-    // document.getElementById("res_liveness").innerHTML = "Face Liveness: " + qaqarray[18 + 1];
+    document.getElementById("res_liveness").innerHTML = "Face Liveness: " + qaqarray[18 + 1];
     
     _free(resultbuffer);
     _free(dst);

@@ -6,10 +6,11 @@ const MASK_THRESHOLD = 0.5;
 const SUNGLASS_THRESHOLD = 0.5;
 const EYE_DIST_THRESHOLD_MIN = 90;
 const EYE_DIST_THRESHOLD_MAX = 150;
-const BLURRINESS_THRESHOLD = 80;
+const BLURRINESS_THRESHOLD = 30;
 const LUMINANCE_LOW_THRESHOLD = 50;
 const LUMINANCE_HIGH_THRESHOLD = 200;
 const EYE_CLOSE_THRESHOLD = 0.8;
+const LIVENESS_THRESHOLD = 0.8;
 
 var CAM_WIDTH = 640;
 var CAM_HEIGHT = 480;
@@ -47,6 +48,30 @@ fetch('liveface.wasm')
 });
 
 
+function send_image(photo) {
+    var url = "https://api.kby-ai.com/check_liveness_base64";
+  
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", url);
+  
+    xhr.setRequestHeader("Accept", "application/json");
+    xhr.setRequestHeader("Content-Type", "application/json");
+  
+    xhr.onreadystatechange = function () {
+        console.log('onreadystatechange ' + xhr.readyState + " " + xhr.status);
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            var json = JSON.parse(xhr.responseText);
+            console.log(json);
+        }
+    };
+  
+    var data = `{
+      "base64": "` + photo + `"
+    }`;
+  
+    xhr.send(data);
+}
+
 function checkFaceQuality() {
     const video = document.getElementById("inputVideo");
     const canvas1 = document.getElementById("capture1");
@@ -61,8 +86,8 @@ function checkFaceQuality() {
     HEAPU8.set(data, dst);
 
     // max 20 objects
-    resultarray = new Float32Array(20);
-    resultbuffer = _malloc(20 * Float32Array.BYTES_PER_ELEMENT);
+    resultarray = new Float32Array(21);
+    resultbuffer = _malloc(21 * Float32Array.BYTES_PER_ELEMENT);
 
     HEAPF32.set(resultarray, resultbuffer / Float32Array.BYTES_PER_ELEMENT);
 
@@ -137,6 +162,10 @@ function checkFaceQuality() {
             msg = "High Luminance";
             brisque_count = 0;
         }
+        // else if(qaqarray[18 + 1] < LIVENESS_THRESHOLD) {//liveness
+        //     msg = "Spoof Face";
+        //     brisque_count = 0;
+        // }
         else{
             msg = "Selfie OK";
 
@@ -146,11 +175,30 @@ function checkFaceQuality() {
                 best_pitch = Math.abs(qaqarray[5 + 1]);
                 best_roll = Math.abs(qaqarray[6 + 1]);
 
-                const video = document.getElementById("capture1");
-                const canvas = document.getElementById("best_capture");
-                canvas.width = video.width
-                canvas.height = video.height
-                canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                // // Create a JSON object containing the image data
+                // const imageJson = {
+                //     file: imageDataURL
+                // };
+
+                // // Convert the JSON object to a JSON string
+                // const jsonString = JSON.stringify(imageJson);
+                
+                // // Make a POST request to the API
+                // fetch('https://api.kby-ai.com/check_liveness_base64', {
+                //     method: 'POST',
+                //     headers: {
+                //     'Content-Type': 'application/json'
+                //     },
+                //     body: JSON.stringify(imageJson)
+                // })
+                // .then(response => response.json())
+                // .then(data => {
+                //     console.log('API response:', data);
+                // })
+                // .catch(error => {
+                //     console.error('Error:', error);
+                // });
             } else {
                 var is_better = 0;
                 if(qaqarray[17 + 1] < best_blurriness) {
@@ -163,12 +211,16 @@ function checkFaceQuality() {
                     best_pitch = Math.abs(qaqarray[5 + 1]);
                     best_roll = Math.abs(qaqarray[6 + 1]);
 
+                   
                     const video = document.getElementById("capture1");
                     const canvas = document.getElementById("best_capture");
                     canvas.width = video.width
                     canvas.height = video.height    
                     canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);    
-                }
+    
+                    // Get the canvas data as a Base64 encoded PNG image
+                    const imageDataURL = canvas.toDataURL('image/png');
+                    send_image(imageDataURL);                }
             }
             
             brisque_count ++;
@@ -204,6 +256,7 @@ function checkFaceQuality() {
     document.getElementById("res_brisque").innerHTML = "Face Brisque: " + qaqarray[7 + 1];
     document.getElementById("res_luminance").innerHTML = "Face Luminance: " + qaqarray[16 + 1];
     document.getElementById("res_blurriness").innerHTML = "Face Blurriness: " + qaqarray[17 + 1];
+    // document.getElementById("res_liveness").innerHTML = "Face Liveness: " + qaqarray[18 + 1];
     
     _free(resultbuffer);
     _free(dst);

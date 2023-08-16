@@ -333,7 +333,7 @@ function isMobile() {
 
 
 function load() {
-    if(isMobile()) {
+    //if(isMobile()) {
 
     //   document.getElementById("inputVideo").style.width = '720px'
     //   document.getElementById("inputVideo").style.height = '960px'

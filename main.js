@@ -296,8 +296,8 @@ async function startCamera() {
         brisque_count = 0;
 
     } else {
-        const canvas = document.getElementById("capture");
-        canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+        // const canvas = document.getElementById("capture");
+        // canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
     
         videoEl.srcObject = null  
         document.getElementById('camera').innerText = "Start Camera";

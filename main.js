@@ -74,195 +74,195 @@ function send_image(photo) {
 
 function checkFaceQuality() {
     const video = document.getElementById("inputVideo");
-    const canvas1 = document.getElementById("capture1");
-    canvas1.width = video.videoWidth;
-    canvas1.height = video.videoHeight;
-    canvas1.getContext('2d').drawImage(video, 0, 0, canvas1.width, canvas1.height);
+    // const canvas1 = document.getElementById("capture1");
+    // canvas1.width = video.videoWidth;
+    // canvas1.height = video.videoHeight;
+    // canvas1.getContext('2d').drawImage(video, 0, 0, canvas1.width, canvas1.height);
 
-    var imageData = canvas1.getContext('2d').getImageData(0, 0, canvas1.width, canvas1.height);
-    var data = imageData.data;
+    // var imageData = canvas1.getContext('2d').getImageData(0, 0, canvas1.width, canvas1.height);
+    // var data = imageData.data;
 
-    dst = _malloc(data.length);
-    HEAPU8.set(data, dst);
+    // dst = _malloc(data.length);
+    // HEAPU8.set(data, dst);
 
-    // max 20 objects
-    resultarray = new Float32Array(21);
-    resultbuffer = _malloc(21 * Float32Array.BYTES_PER_ELEMENT);
+    // // max 20 objects
+    // resultarray = new Float32Array(21);
+    // resultbuffer = _malloc(21 * Float32Array.BYTES_PER_ELEMENT);
 
-    HEAPF32.set(resultarray, resultbuffer / Float32Array.BYTES_PER_ELEMENT);
+    // HEAPF32.set(resultarray, resultbuffer / Float32Array.BYTES_PER_ELEMENT);
 
-    _process(dst, canvas1.width, canvas1.height, resultbuffer);
+    // _process(dst, canvas1.width, canvas1.height, resultbuffer);
 
-    // resultarray
-    var qaqarray = HEAPF32.subarray(resultbuffer / Float32Array.BYTES_PER_ELEMENT, resultbuffer / Float32Array.BYTES_PER_ELEMENT + 143);
+    // // resultarray
+    // var qaqarray = HEAPF32.subarray(resultbuffer / Float32Array.BYTES_PER_ELEMENT, resultbuffer / Float32Array.BYTES_PER_ELEMENT + 143);
 
-    var count = qaqarray[0];
-    var bbox_x = qaqarray[1];
-    var bbox_y = qaqarray[2];
-    var bbox_w = qaqarray[3];
-    var bbox_h = qaqarray[4];
+    // var count = qaqarray[0];
+    // var bbox_x = qaqarray[1];
+    // var bbox_y = qaqarray[2];
+    // var bbox_w = qaqarray[3];
+    // var bbox_h = qaqarray[4];
 
-    var msg = "";
+    // var msg = "";
 
-    if (count == 0) {
-        msg = "No Person Detected"
-    } else if(count > 1) {
-        msg = "Multiple Person Detected"
-    } else {
-        var center_rect_x1 = (CAM_WIDTH / 2) - CENTER_R * 0.9;
-        var center_rect_y1 = (CAM_HEIGHT / 2) - CENTER_R;
-        var center_rect_x2 = (CAM_WIDTH / 2) + CENTER_R * 0.9;
-        var center_rect_y2 = (CAM_HEIGHT / 2) + CENTER_R * 1.1;
+    // if (count == 0) {
+    //     msg = "No Person Detected"
+    // } else if(count > 1) {
+    //     msg = "Multiple Person Detected"
+    // } else {
+    //     var center_rect_x1 = (CAM_WIDTH / 2) - CENTER_R * 0.9;
+    //     var center_rect_y1 = (CAM_HEIGHT / 2) - CENTER_R;
+    //     var center_rect_x2 = (CAM_WIDTH / 2) + CENTER_R * 0.9;
+    //     var center_rect_y2 = (CAM_HEIGHT / 2) + CENTER_R * 1.1;
 
-        if(!(bbox_x >= center_rect_x1 && bbox_y >= center_rect_y1 && bbox_x < center_rect_x2 && bbox_y < center_rect_y2 &&
-            bbox_x + bbox_w >= center_rect_x1 && bbox_y + bbox_h >= center_rect_y1 && bbox_x + bbox_w < center_rect_x2 && bbox_y + bbox_h < center_rect_y2)) {
-            msg = "Move to center";
-            brisque_count = 0;
-        }
-        else if(Math.abs(qaqarray[4 + 1]) > YAW_THRESHOLD) {//yaw
-            msg = "Look Straight";
-            brisque_count = 0;
-        } 
-        else if(Math.abs(qaqarray[5 + 1]) > PITCH_THRESHOLD) {//pitch
-            msg = "Look Straight";
-            brisque_count = 0;
-        }
-        else if(Math.abs(qaqarray[6 + 1]) > ROLL_THRESHOLD) {//roll
-            msg = "Look Straight";
-            brisque_count = 0;
-        }
-        else if(qaqarray[9 + 1] > MASK_THRESHOLD) {//mask
-            msg = "Mask Detected";
-            brisque_count = 0;
-        }
-        else if(qaqarray[10 + 1] > SUNGLASS_THRESHOLD) {//sunglass
-            msg = "Sunglass Detected";
-            brisque_count = 0;
-        }
-        else if(qaqarray[11 + 1] < EYE_CLOSE_THRESHOLD) {//eyeclose
-            msg = "Eye Closed";
-            brisque_count = 0;
-        }
-        else if(qaqarray[8 + 1] < EYE_DIST_THRESHOLD_MIN) {//eyedist
-            msg = "Move Closer";
-            brisque_count = 0;
-        } else if(qaqarray[8 + 1] > EYE_DIST_THRESHOLD_MAX) {//eyedist
-            msg = "Go back";
-            brisque_count = 0;
-        }
-        else if(qaqarray[17 + 1] < BLURRINESS_THRESHOLD) {//brisque
-            msg = "Hold Still";
-            brisque_count = 0;
-        }
-        else if(qaqarray[16 + 1] < LUMINANCE_LOW_THRESHOLD) {//liveness
-            msg = "Low Luminance";
-            brisque_count = 0;
-        }
-        else if(qaqarray[16 + 1] > LUMINANCE_HIGH_THRESHOLD) {//liveness
-            msg = "High Luminance";
-            brisque_count = 0;
-        }
-        else if(qaqarray[18 + 1] < LIVENESS_THRESHOLD) {//liveness
-            msg = "Spoof Face";
-            brisque_count = 0;
-        }
-        else{
-            msg = "Selfie OK";
+    //     if(!(bbox_x >= center_rect_x1 && bbox_y >= center_rect_y1 && bbox_x < center_rect_x2 && bbox_y < center_rect_y2 &&
+    //         bbox_x + bbox_w >= center_rect_x1 && bbox_y + bbox_h >= center_rect_y1 && bbox_x + bbox_w < center_rect_x2 && bbox_y + bbox_h < center_rect_y2)) {
+    //         msg = "Move to center";
+    //         brisque_count = 0;
+    //     }
+    //     else if(Math.abs(qaqarray[4 + 1]) > YAW_THRESHOLD) {//yaw
+    //         msg = "Look Straight";
+    //         brisque_count = 0;
+    //     } 
+    //     else if(Math.abs(qaqarray[5 + 1]) > PITCH_THRESHOLD) {//pitch
+    //         msg = "Look Straight";
+    //         brisque_count = 0;
+    //     }
+    //     else if(Math.abs(qaqarray[6 + 1]) > ROLL_THRESHOLD) {//roll
+    //         msg = "Look Straight";
+    //         brisque_count = 0;
+    //     }
+    //     else if(qaqarray[9 + 1] > MASK_THRESHOLD) {//mask
+    //         msg = "Mask Detected";
+    //         brisque_count = 0;
+    //     }
+    //     else if(qaqarray[10 + 1] > SUNGLASS_THRESHOLD) {//sunglass
+    //         msg = "Sunglass Detected";
+    //         brisque_count = 0;
+    //     }
+    //     else if(qaqarray[11 + 1] < EYE_CLOSE_THRESHOLD) {//eyeclose
+    //         msg = "Eye Closed";
+    //         brisque_count = 0;
+    //     }
+    //     else if(qaqarray[8 + 1] < EYE_DIST_THRESHOLD_MIN) {//eyedist
+    //         msg = "Move Closer";
+    //         brisque_count = 0;
+    //     } else if(qaqarray[8 + 1] > EYE_DIST_THRESHOLD_MAX) {//eyedist
+    //         msg = "Go back";
+    //         brisque_count = 0;
+    //     }
+    //     else if(qaqarray[17 + 1] < BLURRINESS_THRESHOLD) {//brisque
+    //         msg = "Hold Still";
+    //         brisque_count = 0;
+    //     }
+    //     else if(qaqarray[16 + 1] < LUMINANCE_LOW_THRESHOLD) {//liveness
+    //         msg = "Low Luminance";
+    //         brisque_count = 0;
+    //     }
+    //     else if(qaqarray[16 + 1] > LUMINANCE_HIGH_THRESHOLD) {//liveness
+    //         msg = "High Luminance";
+    //         brisque_count = 0;
+    //     }
+    //     else if(qaqarray[18 + 1] < LIVENESS_THRESHOLD) {//liveness
+    //         msg = "Spoof Face";
+    //         brisque_count = 0;
+    //     }
+    //     else{
+    //         msg = "Selfie OK";
 
-            if(best_blurriness == 0) {
-                best_blurriness = qaqarray[17 + 1];
-                best_yaw = Math.abs(qaqarray[4 + 1]);
-                best_pitch = Math.abs(qaqarray[5 + 1]);
-                best_roll = Math.abs(qaqarray[6 + 1]);
+    //         if(best_blurriness == 0) {
+    //             best_blurriness = qaqarray[17 + 1];
+    //             best_yaw = Math.abs(qaqarray[4 + 1]);
+    //             best_pitch = Math.abs(qaqarray[5 + 1]);
+    //             best_roll = Math.abs(qaqarray[6 + 1]);
 
 
-                // // Create a JSON object containing the image data
-                // const imageJson = {
-                //     file: imageDataURL
-                // };
+    //             // // Create a JSON object containing the image data
+    //             // const imageJson = {
+    //             //     file: imageDataURL
+    //             // };
 
-                // // Convert the JSON object to a JSON string
-                // const jsonString = JSON.stringify(imageJson);
+    //             // // Convert the JSON object to a JSON string
+    //             // const jsonString = JSON.stringify(imageJson);
                 
-                // // Make a POST request to the API
-                // fetch('https://api.kby-ai.com/check_liveness_base64', {
-                //     method: 'POST',
-                //     headers: {
-                //     'Content-Type': 'application/json'
-                //     },
-                //     body: JSON.stringify(imageJson)
-                // })
-                // .then(response => response.json())
-                // .then(data => {
-                //     console.log('API response:', data);
-                // })
-                // .catch(error => {
-                //     console.error('Error:', error);
-                // });
-            } else {
-                var is_better = 0;
-                if(qaqarray[17 + 1] < best_blurriness) {
-                    is_better = 0;
-                } else {
-                    is_better = 1;
+    //             // // Make a POST request to the API
+    //             // fetch('https://api.kby-ai.com/check_liveness_base64', {
+    //             //     method: 'POST',
+    //             //     headers: {
+    //             //     'Content-Type': 'application/json'
+    //             //     },
+    //             //     body: JSON.stringify(imageJson)
+    //             // })
+    //             // .then(response => response.json())
+    //             // .then(data => {
+    //             //     console.log('API response:', data);
+    //             // })
+    //             // .catch(error => {
+    //             //     console.error('Error:', error);
+    //             // });
+    //         } else {
+    //             var is_better = 0;
+    //             if(qaqarray[17 + 1] < best_blurriness) {
+    //                 is_better = 0;
+    //             } else {
+    //                 is_better = 1;
 
-                    best_blurriness = qaqarray[17 + 1];
-                    best_yaw = Math.abs(qaqarray[4 + 1]);
-                    best_pitch = Math.abs(qaqarray[5 + 1]);
-                    best_roll = Math.abs(qaqarray[6 + 1]);
+    //                 best_blurriness = qaqarray[17 + 1];
+    //                 best_yaw = Math.abs(qaqarray[4 + 1]);
+    //                 best_pitch = Math.abs(qaqarray[5 + 1]);
+    //                 best_roll = Math.abs(qaqarray[6 + 1]);
 
                    
-                    const video = document.getElementById("capture1");
-                    const canvas = document.getElementById("best_capture");
-                    canvas.width = video.width
-                    canvas.height = video.height    
-                    canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);    
-                }
-            }
+    //                 const video = document.getElementById("capture1");
+    //                 const canvas = document.getElementById("best_capture");
+    //                 canvas.width = video.width
+    //                 canvas.height = video.height    
+    //                 canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);    
+    //             }
+    //         }
             
-            brisque_count ++;
-            const cb = document.querySelector('#autoCapture');
-            if(cb.checked && brisque_count >= 5) {
-                const video = document.getElementById("best_capture");
-                const canvas = document.getElementById("capture");
-                canvas.style.opacity="1.0";
-                canvas.width = video.width
-                canvas.height = video.height
-                canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+    //         brisque_count ++;
+    //         const cb = document.querySelector('#autoCapture');
+    //         if(cb.checked && brisque_count >= 5) {
+    //             const video = document.getElementById("best_capture");
+    //             const canvas = document.getElementById("capture");
+    //             canvas.style.opacity="1.0";
+    //             canvas.width = video.width
+    //             canvas.height = video.height
+    //             canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
                
-                const videoEl = document.getElementById('inputVideo')
-                videoEl.srcObject = null
-                brisque_count = 0;
+    //             const videoEl = document.getElementById('inputVideo')
+    //             videoEl.srcObject = null
+    //             brisque_count = 0;
 
-                document.getElementById('camera').innerText = "Start Camera";
-                document.getElementById("face_cover").style.visibility = "hidden";
+    //             document.getElementById('camera').innerText = "Start Camera";
+    //             document.getElementById("face_cover").style.visibility = "hidden";
 
-                // const imageDataURL = canvas.toDataURL('image/png');
-                // const base64Data = imageDataURL.split(',')[1];
-                // send_image(base64Data);
-            }
-        }
-    }
+    //             // const imageDataURL = canvas.toDataURL('image/png');
+    //             // const base64Data = imageDataURL.split(',')[1];
+    //             // send_image(base64Data);
+    //         }
+    //     }
+    // }
     
-    document.getElementById("cap_message").innerHTML = msg;
-    document.getElementById("res_yaw").innerHTML = "Yaw: " + qaqarray[4 + 1];
-    //document.getElementById("res_yaw").innerHTML = video.videoWidth;
-    document.getElementById("res_pitch").innerHTML = "Pitch: " + qaqarray[5 + 1];
-    //document.getElementById("res_pitch").innerHTML = video.videoHeight;
-    document.getElementById("res_roll").innerHTML = "Roll: " + qaqarray[6 + 1];
-    document.getElementById("res_eyeDist").innerHTML = "Eye Dist: " + qaqarray[8 + 1];
-    document.getElementById("res_eyeClosed").innerHTML = "Eye Closed: " + qaqarray[11 + 1];
-    document.getElementById("res_mask").innerHTML = "Mask: " + qaqarray[9 + 1];
-    document.getElementById("res_sunglass").innerHTML = "Sunglass: " + qaqarray[10 + 1];
-    document.getElementById("res_leftEye").innerHTML = "Left Eye: (" + qaqarray[12 + 1] + ", " + qaqarray[13 + 1] + ")";
-    document.getElementById("res_rightEye").innerHTML = "Right Eye: (" + qaqarray[14 + 1] + ", " + qaqarray[15 + 1] + ")";
-    document.getElementById("res_brisque").innerHTML = "Face Brisque: " + qaqarray[7 + 1];
-    document.getElementById("res_luminance").innerHTML = "Face Luminance: " + qaqarray[16 + 1];
-    document.getElementById("res_blurriness").innerHTML = "Face Blurriness: " + qaqarray[17 + 1];
-    document.getElementById("res_liveness").innerHTML = "Face Liveness: " + qaqarray[18 + 1];
+    // document.getElementById("cap_message").innerHTML = msg;
+    // document.getElementById("res_yaw").innerHTML = "Yaw: " + qaqarray[4 + 1];
+    document.getElementById("res_yaw").innerHTML = video.videoWidth;
+    // document.getElementById("res_pitch").innerHTML = "Pitch: " + qaqarray[5 + 1];
+    document.getElementById("res_pitch").innerHTML = video.videoHeight;
+    // document.getElementById("res_roll").innerHTML = "Roll: " + qaqarray[6 + 1];
+    // document.getElementById("res_eyeDist").innerHTML = "Eye Dist: " + qaqarray[8 + 1];
+    // document.getElementById("res_eyeClosed").innerHTML = "Eye Closed: " + qaqarray[11 + 1];
+    // document.getElementById("res_mask").innerHTML = "Mask: " + qaqarray[9 + 1];
+    // document.getElementById("res_sunglass").innerHTML = "Sunglass: " + qaqarray[10 + 1];
+    // document.getElementById("res_leftEye").innerHTML = "Left Eye: (" + qaqarray[12 + 1] + ", " + qaqarray[13 + 1] + ")";
+    // document.getElementById("res_rightEye").innerHTML = "Right Eye: (" + qaqarray[14 + 1] + ", " + qaqarray[15 + 1] + ")";
+    // document.getElementById("res_brisque").innerHTML = "Face Brisque: " + qaqarray[7 + 1];
+    // document.getElementById("res_luminance").innerHTML = "Face Luminance: " + qaqarray[16 + 1];
+    // document.getElementById("res_blurriness").innerHTML = "Face Blurriness: " + qaqarray[17 + 1];
+    // document.getElementById("res_liveness").innerHTML = "Face Liveness: " + qaqarray[18 + 1];
     
-    _free(resultbuffer);
-    _free(dst);
+    // _free(resultbuffer);
+    // _free(dst);
 }
 
 async function onPlay() {
@@ -271,12 +271,12 @@ async function onPlay() {
     if (videoEl.paused || videoEl.ended)
         return setTimeout(() => onPlay())
 
-    const image = document.getElementById("face_cover");
-    const canvas = document.getElementById("capture");
-    canvas.width = image.width;
-    canvas.height = image.height;
-    canvas.getContext('2d').drawImage(image, 0, 0, canvas.width, canvas.height);
-    document.getElementById("capture").style.opacity = "0.5"
+    // const image = document.getElementById("face_cover");
+    // const canvas = document.getElementById("capture");
+    // canvas.width = image.width;
+    // canvas.height = image.height;
+    // canvas.getContext('2d').drawImage(image, 0, 0, canvas.width, canvas.height);
+    // document.getElementById("capture").style.opacity = "0.5"
 
     checkFaceQuality();
   
@@ -285,7 +285,7 @@ async function onPlay() {
 
 async function startCamera() {  
 
-    const stream = await navigator.mediaDevices.getUserMedia({ video: {width: 640, height: 480} })
+    const stream = await navigator.mediaDevices.getUserMedia({ video: {} })
     const videoEl = document.getElementById('inputVideo')
     if(videoEl.srcObject == null) {
         document.getElementById('camera').innerText = "Stop Camera";    

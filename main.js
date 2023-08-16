@@ -6,7 +6,7 @@ const MASK_THRESHOLD = 0.5;
 const SUNGLASS_THRESHOLD = 0.5;
 const EYE_DIST_THRESHOLD_MIN = 90;
 const EYE_DIST_THRESHOLD_MAX = 150;
-const BLURRINESS_THRESHOLD = 30;
+const BLURRINESS_THRESHOLD = 20;
 const LUMINANCE_LOW_THRESHOLD = 50;
 const LUMINANCE_HIGH_THRESHOLD = 200;
 const EYE_CLOSE_THRESHOLD = 0.8;
@@ -285,42 +285,22 @@ async function onPlay() {
 
 async function startCamera() {  
 
-    if(isMobile()) {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: {} })
-          const videoEl = document.getElementById('inputVideo')
-          if(videoEl.srcObject == null) {
-            document.getElementById('camera').innerText = "Stop Camera";    
-          
-            videoEl.srcObject = stream  
-            old_liveness1 = 0;
-            old_liveness2 = 0;
-            brisque_count = 0;
+    const stream = await navigator.mediaDevices.getUserMedia({ video: {width: 640, height: 480} })
+    const videoEl = document.getElementById('inputVideo')
+    if(videoEl.srcObject == null) {
+        document.getElementById('camera').innerText = "Stop Camera";    
         
-          } else {
-            const canvas = document.getElementById("capture");
-            canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
-        
-            videoEl.srcObject = null  
-            document.getElementById('camera').innerText = "Start Camera";
-          }        
+        videoEl.srcObject = stream  
+        old_liveness1 = 0;
+        old_liveness2 = 0;
+        brisque_count = 0;
+
     } else {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: {} })
-          const videoEl = document.getElementById('inputVideo')
-          if(videoEl.srcObject == null) {
-            document.getElementById('camera').innerText = "Stop Camera";    
-          
-            videoEl.srcObject = stream  
-            old_liveness1 = 0;
-            old_liveness2 = 0;
-            brisque_count = 0;
-        
-          } else {
-            const canvas = document.getElementById("capture");
-            canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
-        
-            videoEl.srcObject = null  
-            document.getElementById('camera').innerText = "Start Camera";
-          }
+        const canvas = document.getElementById("capture");
+        canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+    
+        videoEl.srcObject = null  
+        document.getElementById('camera').innerText = "Start Camera";
     }
 }
 

@@ -1,7 +1,7 @@
 
 const PITCH_THRESHOLD = 7;
 const YAW_THRESHOLD = 7;
-const ROLL_THRESHOLD = 10;
+const ROLL_THRESHOLD = 13;
 const MASK_THRESHOLD = 0.5;
 const SUNGLASS_THRESHOLD = 0.5;
 const EYE_DIST_THRESHOLD_MIN = 90;
@@ -245,10 +245,10 @@ function checkFaceQuality() {
     }
     
     document.getElementById("cap_message").innerHTML = msg;
-    // document.getElementById("res_yaw").innerHTML = "Yaw: " + qaqarray[4 + 1];
-    document.getElementById("res_yaw").innerHTML = video.videoWidth;
-    // document.getElementById("res_pitch").innerHTML = "Pitch: " + qaqarray[5 + 1];
-    document.getElementById("res_pitch").innerHTML = video.videoHeight;
+    document.getElementById("res_yaw").innerHTML = "Yaw: " + qaqarray[4 + 1];
+    // document.getElementById("res_yaw").innerHTML = video.videoWidth;
+    document.getElementById("res_pitch").innerHTML = "Pitch: " + qaqarray[5 + 1];
+    // document.getElementById("res_pitch").innerHTML = video.videoHeight;
     document.getElementById("res_roll").innerHTML = "Roll: " + qaqarray[6 + 1];
     document.getElementById("res_eyeDist").innerHTML = "Eye Dist: " + qaqarray[8 + 1];
     document.getElementById("res_eyeClosed").innerHTML = "Eye Closed: " + qaqarray[11 + 1];

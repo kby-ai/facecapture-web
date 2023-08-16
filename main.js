@@ -335,29 +335,29 @@ function isMobile() {
 function load() {
     if(isMobile()) {
 
-      document.getElementById("inputVideo").style.width = '720px'
-      document.getElementById("inputVideo").style.height = '960px'
+    //   document.getElementById("inputVideo").style.width = '720px'
+    //   document.getElementById("inputVideo").style.height = '960px'
 
-      document.getElementById("capture").style.width = '720px'
-      document.getElementById("capture").style.height = '960px'
+    //   document.getElementById("capture").style.width = '720px'
+    //   document.getElementById("capture").style.height = '960px'
 
-      document.getElementById("face_cover").style.width = '720px'
-      document.getElementById("face_cover").style.height = '960px'
+    //   document.getElementById("face_cover").style.width = '720px'
+    //   document.getElementById("face_cover").style.height = '960px'
 
-      document.getElementById("capture1").style.width = '720px'
-      document.getElementById("capture1").style.height = '960px'
+    //   document.getElementById("capture1").style.width = '720px'
+    //   document.getElementById("capture1").style.height = '960px'
 
-      document.getElementById("best_capture").style.width = '720px'
-      document.getElementById("best_capture").style.height = '960px'
+    //   document.getElementById("best_capture").style.width = '720px'
+    //   document.getElementById("best_capture").style.height = '960px'
 
-      document.getElementById("div_video").style.width = '720px'
-      document.getElementById("div_video").style.height = '960px'
+    //   document.getElementById("div_video").style.width = '720px'
+    //   document.getElementById("div_video").style.height = '960px'
 
-      document.getElementById("face_cover").src = "face_cover_p.png";
+    //   document.getElementById("face_cover").src = "face_cover_p.png";
 
-      CAM_WIDTH = 480;
-      CAM_HEIGHT = 640;
-    } else {
+    //   CAM_WIDTH = 480;
+    //   CAM_HEIGHT = 640;
+    // } else {
       document.getElementById("inputVideo").style.width = '640px'
       document.getElementById("inputVideo").style.height = '480px'
 
@@ -378,6 +378,6 @@ function load() {
 
       CAM_WIDTH = 640;
       CAM_HEIGHT = 480;
-    }
+    // }
   }
 window.onload = load;

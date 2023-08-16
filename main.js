@@ -286,8 +286,7 @@ async function onPlay() {
 async function startCamera() {  
 
     if(isMobile()) {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: {width: 480,
-            height: 640} })
+        const stream = await navigator.mediaDevices.getUserMedia({ video: {} })
           const videoEl = document.getElementById('inputVideo')
           if(videoEl.srcObject == null) {
             document.getElementById('camera').innerText = "Stop Camera";    
@@ -305,8 +304,7 @@ async function startCamera() {
             document.getElementById('camera').innerText = "Start Camera";
           }        
     } else {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: {width: 640,
-            height: 480} })
+        const stream = await navigator.mediaDevices.getUserMedia({ video: {} })
           const videoEl = document.getElementById('inputVideo')
           if(videoEl.srcObject == null) {
             document.getElementById('camera').innerText = "Stop Camera";    

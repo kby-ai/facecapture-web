@@ -162,10 +162,10 @@ function checkFaceQuality() {
             msg = "High Luminance";
             brisque_count = 0;
         }
-        else if(qaqarray[18 + 1] < LIVENESS_THRESHOLD) {//liveness
-            msg = "Spoof Face";
-            brisque_count = 0;
-        }
+        // else if(qaqarray[18 + 1] < LIVENESS_THRESHOLD) {//liveness
+        //     msg = "Spoof Face";
+        //     brisque_count = 0;
+        // }
         else{
             msg = "Selfie OK";
 
@@ -259,7 +259,7 @@ function checkFaceQuality() {
     document.getElementById("res_brisque").innerHTML = "Face Brisque: " + qaqarray[7 + 1];
     document.getElementById("res_luminance").innerHTML = "Face Luminance: " + qaqarray[16 + 1];
     document.getElementById("res_blurriness").innerHTML = "Face Blurriness: " + qaqarray[17 + 1];
-    document.getElementById("res_liveness").innerHTML = "Face Liveness: " + qaqarray[18 + 1];
+    // document.getElementById("res_liveness").innerHTML = "Face Liveness: " + qaqarray[18 + 1];
     
     _free(resultbuffer);
     _free(dst);

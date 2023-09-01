@@ -119,18 +119,18 @@ function checkFaceQuality() {
             msg = "Move to center";
             brisque_count = 0;
         }
-        else if(Math.abs(qaqarray[4 + 1]) > YAW_THRESHOLD) {//yaw
-            msg = "Look Straight";
-            brisque_count = 0;
-        } 
-        else if(Math.abs(qaqarray[5 + 1]) > PITCH_THRESHOLD) {//pitch
-            msg = "Look Straight";
-            brisque_count = 0;
-        }
-        else if(Math.abs(qaqarray[6 + 1]) > ROLL_THRESHOLD) {//roll
-            msg = "Look Straight";
-            brisque_count = 0;
-        }
+        // else if(Math.abs(qaqarray[4 + 1]) > YAW_THRESHOLD) {//yaw
+        //     msg = "Look Straight";
+        //     brisque_count = 0;
+        // } 
+        // else if(Math.abs(qaqarray[5 + 1]) > PITCH_THRESHOLD) {//pitch
+        //     msg = "Look Straight";
+        //     brisque_count = 0;
+        // }
+        // else if(Math.abs(qaqarray[6 + 1]) > ROLL_THRESHOLD) {//roll
+        //     msg = "Look Straight";
+        //     brisque_count = 0;
+        // }
         else if(qaqarray[9 + 1] > MASK_THRESHOLD) {//mask
             msg = "Mask Detected";
             brisque_count = 0;

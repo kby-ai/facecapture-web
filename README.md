@@ -1,5 +1,5 @@
 # facecapture-web
-We implemented our Face SDK in javascript on the web front end
+We implemented our Face SDK on the web front end via Javascript
 
 Please check the following link:
 
